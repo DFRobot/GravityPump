@@ -1,9 +1,9 @@
 #include "GravityPump.h"
 #include <EEPROM.h>
 
-#define FLOWRATEADDRESS 0x24
-#define PUMPSPEEDADDRESS 0x28
-#define CALIBRATIONTIME 15
+#define FLOWRATEADDRESS 0x24    //EEPROM address for flowrate, for more pump need to add more address. 
+#define PUMPSPEEDADDRESS 0x28   //EEPROM address for speed, for more pump need to add more address.
+#define CALIBRATIONTIME 15      //when Calibration pump running time, unit secend
 #define ReceivedBufferLength 20
 
 #define EEPROM_write(address, p) {int i = 0; byte *pp = (byte*)&(p);for(; i < sizeof(p); i++) EEPROM.write(address+i, pp[i]);}
@@ -19,25 +19,26 @@ GravityPump::~GravityPump()
 
 }
 
-void GravityPump::setPin(int pin)
+void GravityPump::setPin(int pin)   //pump pin setting
 {
     this->_pin = pin;
     this->_pumpServo.attach(this->_pin);
 }
 
-void GravityPump::getFlowRateAndSpeed()
+void GravityPump::getFlowRateAndSpeed()      //flowrate and speed reading from EEPROM
 {
     EEPROM_read(FLOWRATEADDRESS, this->_flowRate);
     delay(5);
     EEPROM_read(PUMPSPEEDADDRESS, this->_pumpSpeed);
 }
 
-void GravityPump::update()
+void GravityPump::update()      //get the state from system, need to be put in the loop.
 {
     pumpDriver(this->_pumpSpeed,this->_intervalTime);
 }
 
-void GravityPump::pumpDriver(int speed, unsigned long runTime)
+void GravityPump::pumpDriver(int speed, unsigned long runTime)      //the basic pump function, have to given speed in number(0 to 180. 90 for stop, 
+                                                                    //0 and 180 is max speed in each direction.)and runing time in milliseced.
 {
     if(this->_stopFlag || millis() - this->_startTime >= runTime)
     {
@@ -52,7 +53,8 @@ void GravityPump::pumpDriver(int speed, unsigned long runTime)
     }    
 }
 
-float GravityPump::flowPump(float quantitation)
+float GravityPump::flowPump(float quantitation)     //quantification setting pump function,base on the basic function.the function need to given a quantification. Then the pump will dosing the quantification
+                                                    //in given number. if you have Calibration, the number will be close to result.
 {
     unsigned long runTime = 0;
     if(!this->_runFlag)
@@ -65,7 +67,8 @@ float GravityPump::flowPump(float quantitation)
     return 0;
 }
 
-float GravityPump::timerPump(unsigned long runTime)
+float GravityPump::timerPump(unsigned long runTime) //timer pump function,base on the basic function.the function need to  given the running time then the pump will dosing as long as your have given.
+                                                    //and return the quantitation. if you have Calibration,  the number will be close to result.
 {
     if(!this->_runFlag)
     {
@@ -77,23 +80,18 @@ float GravityPump::timerPump(unsigned long runTime)
     return 0;
 }
 
-void GravityPump::stop()
+void GravityPump::stop()    //stop function. whenever you use this function the pump will stop immediately.
 {
     this->_stopFlag = true;
     this->_runFlag = false;
 }
 
-void GravityPump::calFlowRate(int speed)
+void GravityPump::calFlowRate(int speed) //Calibration function.the speed parameter is running speed what you needed.
 {
-   	//给定时间内看有多少流量？
-	//在串口中输入相应液体体积。
-	//how much quantitation in given time?
-	//please input the ok in serial to start cal
-	//wait for the input "OK"
-	//Pump 5ml in some secs
-	//please input the actual mumber in serial
-	//waiting for input actual number 
-	//cal end
+    //please input the "STARTCAL" in serial to start cal
+    //Pump some liquid in some secs
+    //please input the actual mumber in serial by "SETCAL:XX"
+    //cal end
     this->_pumpSpeed = speed;
     if(serialDataAvailable() > 0)
     {
