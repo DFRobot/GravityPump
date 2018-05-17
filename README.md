@@ -57,8 +57,10 @@ Attention:Since the motor power consumption (about 5W) is a little large, it’s
 ### Pulsation: Three Rollers, Small Pulsation
 ### Flow: ≥45ml/min (almost 1ml/s)
 ### Working Conditions: ambient temperature 0 ~ 40 ℃, relative humidity <80%
+---
 
 ## Function introduction
+
 ### void pumpDriver(int speed, unsigned long runTime);
 #### the basic pump function, have to given speed in number(0 to 180. 90 for stop,0 and 180 is max speed in each direction.)and runing time in milliseced.
 #### 基本功能，有两个参数，第一个是速度参数，0到180，其中90为停止，0和180为两个方向最大速度。第二个是运行时间，以毫秒为单位。
